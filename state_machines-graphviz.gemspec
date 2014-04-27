@@ -8,8 +8,8 @@ Gem::Specification.new do |spec|
   spec.version       = StateMachines::Graphviz::VERSION
   spec.authors       = ['Abdelkader Boudih', 'Aaron Pfeifer']
   spec.email         = ['terminale@gmail.com']
-  spec.summary       = %q(Drawing module for state machine2)
-  spec.description   = %q(Graphviz module for state machine2)
+  spec.summary       = %q(Drawing module for state machines)
+  spec.description   = %q(Graphviz module for state machines)
   spec.homepage      = 'https://github.com/seuros/state_machines-graphviz'
   spec.license       = 'MIT'
 
