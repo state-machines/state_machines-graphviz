@@ -1,5 +1,0 @@
-require 'state_machines'
-require 'graphviz'
-require 'state_machines/graphviz/monkeypatch'
-require 'state_machines/graphviz/graph'
-require 'state_machines/graphviz/version'
