@@ -1,6 +1,5 @@
 language: ruby
 install: sudo apt-get install graphviz -y
-before_install: gem install bundler
 script: bundle exec rake
 rvm:
   - 1.9.3
