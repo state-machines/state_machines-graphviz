@@ -26,6 +26,11 @@ To generate a graph for a specific file / class:
 ```bash
 rake state_machines:draw FILE=vehicle.rb CLASS=Vehicle
 ```
+From a Rails app directory:
+
+```bash
+rake state_machines:draw CLASS=Vehicle
+```
 
 To save files to a specific path:
 
