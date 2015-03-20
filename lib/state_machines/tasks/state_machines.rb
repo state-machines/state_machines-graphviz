@@ -1,3 +1,5 @@
+# Test with:
+#  rake state_machines:draw FILE=./spec/files/switch.rb CLASS=Switch
 namespace :state_machines do
   desc 'Draws state machines using GraphViz (options: CLASS=User,Vehicle; FILE=user.rb,vehicle.rb [not required in Rails / Merb]; FONT=Arial; FORMAT=png; ORIENTATION=portrait; HUMAN_NAMES=true'
   task :draw do
