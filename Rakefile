@@ -8,3 +8,5 @@ end
 
 desc 'Default: run all tests.'
 task :default => :spec
+
+load File.dirname(__FILE__) + '/lib/state_machines/tasks/state_machines.rake'
