@@ -21,7 +21,7 @@ describe StateMachines::Graph do
 
   def test_should_save_file_with_class_name_by_default
     @machine.draw
-    assert File.exist?("doc/state_@machines/#{@klass.name}_state.png"),"Failed to save file with class name"
+    assert File.exist?("doc/state_machines/#{@klass.name}_state.png"),"Failed to save file with class name"
   end
 
   def test_should_allow_base_name_to_be_customized
@@ -32,7 +32,7 @@ describe StateMachines::Graph do
 
   def test_should_allow_format_to_be_customized
     @machine.draw(format: 'jpg')
-    @path = "doc/state_@machines/#{@klass.name}_state.jpg"
+    @path = "doc/state_machines/#{@klass.name}_state.jpg"
     assert File.exist?(@path),"allow format to be custom"
   end
 
