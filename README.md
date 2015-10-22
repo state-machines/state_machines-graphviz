@@ -44,7 +44,7 @@ To customize the image format / orientation:
 rake state_machines:draw FILE=vehicle.rb CLASS=Vehicle FORMAT=jpg ORIENTATION=landscape
 ```
 
-See http://rdoc.info/github/glejeune/Ruby-Graphviz/GraphViz/Constants for the list of
+Check [this list](http://rdoc.info/github/glejeune/Ruby-Graphviz/GraphViz/Constants) of
 supported image formats.  If resolution is an issue, the svg format may offer
 better results.
 
