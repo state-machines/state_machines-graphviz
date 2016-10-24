@@ -62,7 +62,7 @@ module StateMachines
 
       # Add nodes / edges
       states.by_priority.each { |state| state.draw(graph, draw_options) }
-      events.each { |event| event.draw(graph, draw_options) }
+      events.each { |event| event.draw(graph, self, draw_options) }
 
       # Output result
       graph.output
@@ -105,10 +105,10 @@ module StateMachines
     # Configuration options:
     # * <tt>:human_name</tt> - Whether to use the event's human name for the
     #   node's label that gets drawn on the graph
-    def draw(graph, options = {})
+    def draw(graph, machine, options = {})
       valid_states = machine.states.by_priority.map {|state| state.name}
       branches.each do |branch|
-        branch.draw(graph, options[:human_name] ? human_name : name, valid_states)
+        branch.draw(graph, machine, options[:human_name] ? human_name : name, valid_states)
       end
 
       true
@@ -133,7 +133,7 @@ module StateMachines
     #
     # Each edge will be labeled with the name of the event that would cause the
     # transition.
-    def draw(graph, event, valid_states)
+    def draw(graph, machine, event, valid_states)
       state_requirements.each do |state_requirement|
         # From states determined based on the known valid states
         from_states = state_requirement[:from].filter(valid_states)
@@ -151,11 +151,30 @@ module StateMachines
         # Generate an edge between each from and to state
         from_states.each do |from_state|
           from_state = from_state ? from_state.to_s : 'nil'
-          graph.add_edges(from_state, loopback ? from_state : to_state, :label => event.to_s)
+          graph.add_edges(from_state, loopback ? from_state : to_state,
+                          :label => event.to_s,
+                          :labelfontsize => 10,
+                          :taillabel => callback_method_names(machine, :before).join('\n'),
+                          :headlabel => callback_method_names(machine, :after).join('\n')
+          )
         end
       end
 
       true
+    end
+
+    private
+
+    def callback_method_names(machine, type)
+      machine.callbacks[type].select do |callback|
+        callback.branch.matches?(self,
+                                 from: state_requirements.map {|requirement| requirement[:from]},
+                                 to: state_requirements.map {|requirement| requirement[:to]},
+                                 on: event_requirement.values.first
+        )
+      end.map do |callback|
+        callback.instance_variable_get('@methods')
+      end.flatten
     end
   end
 end
