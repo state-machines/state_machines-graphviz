@@ -10,7 +10,7 @@ Gem::Specification.new do |spec|
   spec.email         = ['terminale@gmail.com']
   spec.summary       = %q(Drawing module for state machines)
   spec.description   = %q(Graphviz module for state machines)
-  spec.homepage      = 'https://github.com/seuros/state_machines-graphviz'
+  spec.homepage      = 'https://github.com/state-machines/state_machines-graphviz'
   spec.license       = 'MIT'
 
   spec.files         = `git ls-files -z`.split("\x0")
