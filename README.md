@@ -19,6 +19,8 @@ Or install it yourself as:
 
 ## Usage
 
+The default output folder for the images is `doc/state_machines`.
+
 #### Examples
 
 To generate a graph for a specific file / class:
