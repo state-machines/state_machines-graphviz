@@ -71,7 +71,7 @@ examples folder.
 
 ### Interactive graphs
 
-Jean Bovet's [Visual Automata Simulator](http://www.cs.usfca.edu/~jbovet/vas.html)
+Jean Bovet's [Visual Automata Simulator](https://github.com/NimaGhaedsharafi/VAS)
 is a great tool for "simulating, visualizing and transforming finite state
 automata and Turing Machines".  It can help in the creation of states and events
 for your models.  It is cross-platform, written in Java.
