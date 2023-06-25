@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require_relative 'test_helper'
 describe StateMachines::Graph do
   def setup
@@ -10,6 +12,6 @@ describe StateMachines::Graph do
   end
 
   def test_should_use_doublecircle_as_shape
-    assert_equal('doublecircle',@node['shape'].to_s.gsub('"', ''))
+    assert_equal('doublecircle', @node['shape'].to_s.gsub('"', ''))
   end
 end

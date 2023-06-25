@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require_relative 'test_helper'
 
 describe StateMachines::Graph do
@@ -13,18 +15,17 @@ describe StateMachines::Graph do
       transition parked: :idling
     end
 
-    @machine.state :idling, value: lambda { Time.now }
+    @machine.state :idling, value: -> { Time.now }
 
     @graph = @machine.draw
-
   end
-  
+
   def test_should_draw_all_states
-    assert(@graph.node_count,3)
+    assert(@graph.node_count, 3)
   end
 
   def test_should_draw_all_events
-    assert(@graph.edge_count,2)
+    assert(@graph.edge_count, 2)
   end
 
   def test_should_draw_machine

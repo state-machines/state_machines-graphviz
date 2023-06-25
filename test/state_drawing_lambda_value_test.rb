@@ -1,8 +1,10 @@
+# frozen_string_literal: true
+
 require_relative 'test_helper'
 describe StateMachines::Graph do
   def setup
     @machine = StateMachines::Machine.new(Class.new)
-    @machine.states << @state = StateMachines::State.new(@machine, :parked, :value => lambda {})
+    @machine.states << @state = StateMachines::State.new(@machine, :parked, value: -> {})
 
     graph = StateMachines::Graph.new('test')
     @state.draw(graph)
@@ -14,6 +16,6 @@ describe StateMachines::Graph do
   end
 
   def test_should_use_description_as_label
-    assert_equal('parked (*)',@node['label'].to_s.gsub('"', ''))
+    assert_equal('parked (*)', @node['label'].to_s.gsub('"', ''))
   end
 end
