@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'state_machines/graphviz'
 require 'rails'
 module StateMachines

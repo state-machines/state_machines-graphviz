@@ -1,4 +1,6 @@
-#TODO register graphviz as render engine
+# frozen_string_literal: true
+
+# TODO: register graphviz as render engine
 module StateMachines
   class Machine
     class << self
@@ -13,10 +15,10 @@ module StateMachines
       # * <tt>:format</tt> - The image format to generate the graph in
       # * <tt>:font</tt> - The name of the font to draw state names in
       def draw(class_names, options = {})
-        raise ArgumentError, 'At least one class must be specified' unless class_names && class_names.split(',').any?
+        raise ArgumentError, 'At least one class must be specified' unless class_names&.split(',')&.any?
 
         # Load any files
-        if files = options.delete(:file)
+        if (files = options.delete(:file))
           files.split(',').each { |file| require file }
         end
 
@@ -57,7 +59,7 @@ module StateMachines
     #   node labels on the graph instead of the internal name.  Default is false.
     def draw(graph_options = {})
       name = graph_options.delete(:name) || "#{owner_class.name}_#{self.name}"
-      draw_options = {:human_name => false}
+      draw_options = { human_name: false }
       draw_options[:human_name] = graph_options.delete(:human_names) if graph_options.include?(:human_names)
 
       graph = Graph.new(name, graph_options)
@@ -87,14 +89,13 @@ module StateMachines
     #   node's label that gets drawn on the graph
     def draw(graph, options = {})
       node = graph.add_nodes(name ? name.to_s : 'nil',
-                             :label => description(options),
-                             :width => '1',
-                             :height => '1',
-                             :shape => final? ? 'doublecircle' : 'ellipse'
-      )
+                             label: description(options),
+                             width: '1',
+                             height: '1',
+                             shape: final? ? 'doublecircle' : 'ellipse')
 
       # Add open arrow for initial state
-      graph.add_edges(graph.add_nodes('starting_state', :shape => 'point'), node) if initial?
+      graph.add_edges(graph.add_nodes('starting_state', shape: 'point'), node) if initial?
 
       true
     end
@@ -110,7 +111,7 @@ module StateMachines
     # * <tt>:human_name</tt> - Whether to use the event's human name for the
     #   node's label that gets drawn on the graph
     def draw(graph, machine, options = {})
-      valid_states = machine.states.by_priority.map {|state| state.name}
+      valid_states = machine.states.by_priority.map(&:name)
       branches.each do |branch|
         branch.draw(graph, machine, options[:human_name] ? human_name : name, valid_states)
       end
@@ -157,11 +158,10 @@ module StateMachines
         from_states.each do |from_state|
           from_state = from_state ? from_state.to_s : 'nil'
           graph.add_edges(from_state, loopback ? from_state : to_state,
-                          :label => event.to_s,
-                          :labelfontsize => 10,
-                          :taillabel => callback_method_names(machine, :before).join('\n'),
-                          :headlabel => callback_method_names(machine, :after).join('\n')
-          )
+                          label: event.to_s,
+                          labelfontsize: 10,
+                          taillabel: callback_method_names(machine, :before).join('\n'),
+                          headlabel: callback_method_names(machine, :after).join('\n'))
         end
       end
 
@@ -173,10 +173,9 @@ module StateMachines
     def callback_method_names(machine, type)
       machine.callbacks[type].select do |callback|
         callback.branch.matches?(self,
-                                 from: state_requirements.map {|requirement| requirement[:from]},
-                                 to: state_requirements.map {|requirement| requirement[:to]},
-                                 on: event_requirement.values.first
-        )
+                                 from: state_requirements.map { |requirement| requirement[:from] },
+                                 to: state_requirements.map { |requirement| requirement[:to] },
+                                 on: event_requirement.values.first)
       end.map do |callback|
         callback.instance_variable_get('@methods')
       end.flatten
