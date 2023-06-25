@@ -2,6 +2,7 @@
 module StateMachines
   class Machine
     class << self
+      undef_method :draw
       # Draws the state machines defined in the given classes using GraphViz.
       # The given classes must be a comma-delimited string of class names.
       #
@@ -34,6 +35,7 @@ module StateMachines
       end
     end
 
+    undef_method :draw
     # Draws a directed graph of the machine for visualizing the various events,
     # states, and their transitions.
     #
@@ -71,6 +73,7 @@ module StateMachines
   end
 
   class State
+    undef_method :draw
     # Draws a representation of this state on the given machine.  This will
     # create a new node on the graph with the following properties:
     # * +label+ - The human-friendly description of the state.
@@ -98,6 +101,7 @@ module StateMachines
   end
 
   class Event
+    undef_method :draw
     # Draws a representation of this event on the given graph.  This will
     # create 1 or more edges on the graph for each branch (i.e. transition)
     # configured.
@@ -116,6 +120,7 @@ module StateMachines
   end
 
   class Branch
+    undef_method :draw
     # Draws a representation of this branch on the given graph.  This will draw
     # an edge between every state this branch matches *from* to either the
     # configured to state or, if none specified, then a loopback to the from
