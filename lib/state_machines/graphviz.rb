@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
 require 'state_machines'
-require 'state_machines-diagram'
 require 'graphviz'
 require 'state_machines/graphviz/graph'
 require 'state_machines/graphviz/renderer'
