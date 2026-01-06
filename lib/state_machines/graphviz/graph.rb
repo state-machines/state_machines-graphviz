@@ -25,7 +25,7 @@ module StateMachines
     #   "landscape").  Default is "portrait".
     def initialize(name, options = {})
       options = { path: 'doc/state_machines', format: 'png', font: 'Arial', orientation: 'portrait' }.merge(options)
-      options.assert_valid_keys(:path, :format, :font, :orientation)
+      StateMachines::OptionsValidator.assert_valid_keys!(options, :path, :format, :font, :orientation)
 
       # TODO: fail if path cannot be created or readonly
       FileUtils.mkpath(options[:path]) unless Dir.exist? options[:path]
