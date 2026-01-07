@@ -69,6 +69,16 @@ in the class.  The generated files will use an output filename of the format
 For examples of actual images generated using this task, see those under the
 examples folder.
 
+#### Example output
+
+Generate the sample diagram used in this README:
+
+```bash
+bundle exec ruby script/generate_example.rb
+```
+
+![Switch state machine](doc/switch.svg)
+
 ### Interactive graphs
 
 Jean Bovet's [Visual Automata Simulator](https://github.com/NimaGhaedsharafi/VAS)

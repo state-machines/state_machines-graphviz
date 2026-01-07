@@ -1,26 +1,22 @@
 # frozen_string_literal: true
 
+require 'state_machines-diagram'
+
 module StateMachines
   module Graphviz
     module Renderer
       extend self
 
       def draw_machine(machine, io: $stdout, **options)
+        diagram, builder = StateMachines::Diagram::Renderer.build_state_diagram(machine, options)
         graph_options = options.dup
         name = graph_options.delete(:name) || "#{machine.owner_class.name}_#{machine.name}"
 
         draw_options = { human_name: false }
-        if graph_options.key?(:human_names)
-          draw_options[:human_name] = graph_options.delete(:human_names)
-        elsif graph_options.key?(:human_name)
-          draw_options[:human_name] = graph_options.delete(:human_name)
-        end
+        draw_options[:human_name] = graph_options.delete(:human_names) if graph_options.include?(:human_names)
 
         graph = Graph.new(name, graph_options)
-
-        machine.states.by_priority.each { |state| state.draw(graph, draw_options) }
-        machine.events.each { |event| draw_event(event, graph, draw_options, io) }
-
+        render_diagram(graph, diagram, builder, draw_options)
         graph.output
         graph
       end
@@ -57,6 +53,65 @@ module StateMachines
       end
 
       private
+
+      def render_diagram(graph, diagram, builder, draw_options)
+        state_lookup = build_state_lookup(builder.machine)
+        state_metadata = builder&.state_metadata || {}
+        start_node = nil
+
+        diagram.states.each do |state_node|
+          metadata = state_metadata[state_node.id] || {}
+          state = state_lookup[state_node.id]
+          label = state ? state.description(human_name: draw_options[:human_name]) : (state_node.label || state_node.id)
+          shape = metadata[:type] == 'final' ? 'doublecircle' : 'ellipse'
+
+          node = graph.add_nodes(
+            graph_node_id(state_node.id),
+            label: label,
+            width: '1',
+            height: '1',
+            shape: shape
+          )
+
+          if metadata[:type] == 'initial'
+            start_node ||= graph.add_nodes('starting_state', shape: 'point')
+            graph.add_edges(start_node, node)
+          end
+        end
+
+        transition_metadata = transition_metadata_map(builder)
+        diagram.transitions.each do |transition|
+          metadata = transition_metadata[transition] || {}
+          callbacks = metadata[:callbacks] || {}
+
+          graph.add_edges(
+            graph_node_id(transition.source_state_id),
+            graph_node_id(transition.target_state_id),
+            label: transition.label.to_s,
+            labelfontsize: 10,
+            taillabel: Array(callbacks[:before]).compact.join("\n"),
+            headlabel: Array(callbacks[:after]).compact.join("\n")
+          )
+        end
+      end
+
+      def build_state_lookup(machine)
+        machine.states.each_with_object({}) do |state, memo|
+          key = state.name ? state.name.to_s : 'nil_state'
+          memo[key] = state
+        end
+      end
+
+      def graph_node_id(diagram_state_id)
+        diagram_state_id == 'nil_state' ? 'nil' : diagram_state_id
+      end
+
+      def transition_metadata_map(builder)
+        Array(builder&.transition_metadata).each_with_object({}) do |metadata, memo|
+          transition = metadata[:transition]
+          memo[transition] = metadata if transition
+        end
+      end
 
       def draw_branch_with_label(branch, graph, event_label, machine, valid_states)
         branch.state_requirements.each do |state_requirement|
