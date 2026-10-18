@@ -9,6 +9,7 @@ Gem::Specification.new do |spec|
   spec.description   = %q(Graphviz module for state machines)
   spec.homepage      = 'https://github.com/state-machines/state_machines-graphviz'
   spec.license       = 'MIT'
+  spec.required_ruby_version = '>= 4.0'
 
   spec.files         = Dir['{lib}/**/*', 'LICENSE.txt', 'README.md']
   spec.test_files    = Dir['test/**/*']
