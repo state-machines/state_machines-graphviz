@@ -6,7 +6,7 @@ describe StateMachines::Graph do
   def setup
     @klass = Class.new do
       def self.name
-        @name ||= "Vehicle_#{rand(1_000_000)}"
+        @name ||= "Vehicle_#{SecureRandom.hex(6)}"
       end
     end
 
@@ -26,7 +26,7 @@ describe StateMachines::Graph do
   end
 
   def test_should_allow_base_name_to_be_customized
-    name = "@machine_#{rand(1_000_000)}"
+    name = "@machine_#{SecureRandom.hex(6)}"
     @machine.draw(name: name)
     @path = "doc/state_@machines/#{name}.png"
   end
