@@ -3,7 +3,7 @@
 require_relative 'test_helper'
 describe StateMachines::Graph do
   def setup
-    @graph_name = "test_#{rand(1_000_000)}"
+    @graph_name = "test_#{SecureRandom.hex(6)}"
     @graph = StateMachines::Graph.new(@graph_name)
     @graph.add_nodes('parked', shape: 'ellipse')
     @graph.add_nodes('idling', shape: 'ellipse')

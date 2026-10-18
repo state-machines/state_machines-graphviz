@@ -6,7 +6,7 @@ describe StateMachines::Graph do
   def setup
     @klass = Class.new do
       def self.name
-        @name ||= "Vehicle_#{rand(1_000_000)}"
+        @name ||= "Vehicle_#{SecureRandom.hex(6)}"
       end
     end
 
