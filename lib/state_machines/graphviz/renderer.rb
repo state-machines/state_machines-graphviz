@@ -1,9 +1,6 @@
 # frozen_string_literal: true
 
-require 'state_machines'
-# The builder alone: state_machines-diagram's entry point would make its own
-# renderer the global one
-require 'state_machines/diagram/builder'
+require 'state_machines-diagram'
 
 module StateMachines
   module Graphviz

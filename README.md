@@ -19,6 +19,20 @@ Or install it yourself as:
 
 ## Usage
 
+Requiring the gem changes no global state. Choose the GraphViz renderer for
+`Machine#draw` (and `State`, `Event` and `Branch#draw`), as the core intends:
+
+```ruby
+require 'state_machines-graphviz'
+
+StateMachines::Machine.renderer = StateMachines::Graphviz::Renderer
+Vehicle.state_machine(:state).draw(path: 'doc/state_machines', format: 'svg')
+```
+
+or draw with it directly, whatever renderer is chosen:
+`StateMachines::Graphviz::Renderer.draw_machine(machine)`,
+`StateMachines::Graphviz.draw('Vehicle')`, or the rake task below.
+
 The default output folder for the images is `doc/state_machines`.
 
 #### Examples

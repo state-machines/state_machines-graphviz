@@ -28,6 +28,20 @@ class GraphvizDrawTest < Minitest::Test
     Object.send(:remove_const, :GraphvizDrawLamp)
   end
 
+  def test_requiring_the_gem_leaves_the_global_renderer_alone
+    code = "require 'state_machines'; before = StateMachines::Machine.renderer; " \
+           "require 'state_machines-graphviz'; exit StateMachines::Machine.renderer.equal?(before)"
+
+    assert system(RbConfig.ruby, '-Ilib', '-e', code), 'requiring state_machines-graphviz changed Machine.renderer'
+  end
+
+  def test_requiring_the_draw_task_leaves_the_global_renderer_alone
+    code = "require 'rake'; require 'state_machines'; before = StateMachines::Machine.renderer; " \
+           "require 'state_machines/tasks/state_machines'; exit StateMachines::Machine.renderer.equal?(before)"
+
+    assert system(RbConfig.ruby, '-Ilib', '-e', code), 'loading the draw task changed Machine.renderer'
+  end
+
   def test_draw_needs_a_class
     assert_raises(ArgumentError) { StateMachines::Graphviz.draw(' , ', path: @dir) }
   end
