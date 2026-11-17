@@ -69,6 +69,20 @@ in the class.  The generated files will use an output filename of the format
 For examples of actual images generated using this task, see those under the
 examples folder.
 
+#### What is drawn
+
+The graph is built by [state_machines-diagram](https://github.com/state-machines/state_machines-diagram),
+so it shows what the core performs:
+
+* the initial state gets an edge from a start point, final states a double circle
+* a state's value shows after its name when the two differ: `parked (1)`, `idling (*)` for a lambda
+* each edge reads `event` and, when guarded, its conditions as the core checks them:
+  `[if engine_started? && unless braking? && if_any_state (gate=open, alarm=on)]`
+* before (and around) callbacks sit at an edge's tail, after callbacks at its head,
+  a conditional one with its conditions: `log_start (if logging?)`
+* from one source an event takes its first matching branch, so a branch an unguarded
+  one before it always takes over is not drawn
+
 #### Example output
 
 Generate the sample diagram used in this README:

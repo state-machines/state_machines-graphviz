@@ -1,154 +1,138 @@
 # frozen_string_literal: true
 
-require 'state_machines-diagram'
+require 'state_machines'
+# The builder alone: state_machines-diagram's entry point would make its own
+# renderer the global one
+require 'state_machines/diagram/builder'
 
 module StateMachines
   module Graphviz
+    # Draws a machine, or the part of it one state, event or branch involves,
+    # with GraphViz. What is drawn comes from StateMachines::Diagram::Builder:
+    # its states and markers, the transitions the core performs, their guards
+    # and the callbacks that run on them.
     module Renderer
+      # The start point's node id: the diagram's terminal pseudo-state, which
+      # Builder.state_id never gives a state
+      START_NODE_ID = ::Diagrams::StateDiagram::TERMINAL
+      # Characters DOT reads as escapes or breaks in a quoted id; ruby-graphviz
+      # writes ids holding them as they are
+      UNSAFE_ID = /[\\[:cntrl:]]/
+      # Characters ruby-graphviz writes into a label as they are, so DOT would
+      # read them as escapes (\N, \n, ...) or the label as HTML (<...>)
+      LABEL_ESCAPES = /[\\<]/
+
       extend self
 
-      def draw_machine(machine, io: $stdout, **options)
-        diagram, builder = StateMachines::Diagram::Renderer.build_state_diagram(machine, options)
+      # Draws the whole machine and writes the graph's file
+      def draw_machine(machine, **options)
         graph_options = options.dup
         name = graph_options.delete(:name) || "#{machine.owner_class.name}_#{machine.name}"
-
-        draw_options = { human_name: false }
-        draw_options[:human_name] = graph_options.delete(:human_names) if graph_options.include?(:human_names)
-
+        human_names = graph_options.delete(:human_names)
         graph = Graph.new(name, graph_options)
-        render_diagram(graph, diagram, builder, draw_options)
+
+        builder = Diagram::Builder.new(machine, human_names: human_names)
+        builder.build
+        draw_built(graph, builder)
         graph.output
         graph
       end
 
-      def draw_state(state, graph, options = {}, io = $stdout)
-        node = graph.add_nodes(
-          state.name ? state.name.to_s : 'nil',
-          label: state.description(options),
-          width: '1',
-          height: '1',
-          shape: state.final? ? 'doublecircle' : 'ellipse'
-        )
-
-        graph.add_edges(graph.add_nodes('starting_state', shape: 'point'), node) if state.initial?
-        true
+      # Adds the state's node, and the start point if it is the initial state
+      def draw_state(state, graph, options = {}, _io = $stdout)
+        builder = Diagram::Builder.new(state.machine, human_names: options[:human_name])
+        builder.build_state(state)
+        add_state_node(graph, builder, state)
+        graph
       end
 
-      def draw_event(event, graph, options = {}, io = $stdout)
-        machine = event.machine
-        valid_states = machine.states.by_priority.map(&:name)
-        event_label = options[:human_name] ? event.human_name(machine.owner_class) : event.name.to_s
-
-        event.branches.each do |branch|
-          draw_branch_with_label(branch, graph, event_label, machine, valid_states)
-        end
-
-        true
+      # Adds the transitions the event performs and the states they connect
+      def draw_event(event, graph, options = {}, _io = $stdout)
+        builder = Diagram::Builder.new(event.machine, human_names: options[:human_name])
+        builder.build_event(event)
+        draw_built(graph, builder)
+        graph
       end
 
-      def draw_branch(branch, graph, event, valid_states, io = $stdout)
-        machine = event.machine
-        draw_branch_with_label(branch, graph, event.name.to_s, machine, valid_states)
-        true
+      # Adds the transitions one branch performs and the states they connect.
+      # The core passes no options (Branch#draw).
+      def draw_branch(branch, graph, event, _valid_states, _io = $stdout)
+        builder = Diagram::Builder.new(event.machine)
+        builder.build_branch(branch, event)
+        draw_built(graph, builder)
+        graph
+      end
+
+      # The node id of the state with diagram id +state_id+. An id DOT would
+      # misread is drawn by its bytes in hex, as Builder.state_id escapes ids:
+      # the builder only escapes names that hold none of those characters,
+      # so the two never meet.
+      def node_id(state_id)
+        state_id.match?(UNSAFE_ID) ? "%#{state_id.unpack1('H*')}" : state_id
       end
 
       private
 
-      def render_diagram(graph, diagram, builder, draw_options)
-        state_lookup = build_state_lookup(builder.machine)
-        state_metadata = builder&.state_metadata || {}
-        start_node = nil
-
-        diagram.states.each do |state_node|
-          metadata = state_metadata[state_node.id] || {}
-          state = state_lookup[state_node.id]
-          label = state ? state.description(human_name: draw_options[:human_name]) : (state_node.label || state_node.id)
-          shape = metadata[:type] == 'final' ? 'doublecircle' : 'ellipse'
-
-          node = graph.add_nodes(
-            graph_node_id(state_node.id),
-            label: label,
-            width: '1',
-            height: '1',
-            shape: shape
-          )
-
-          if metadata[:type] == 'initial'
-            start_node ||= graph.add_nodes('starting_state', shape: 'point')
-            graph.add_edges(start_node, node)
-          end
-        end
-
-        transition_metadata = transition_metadata_map(builder)
-        diagram.transitions.each do |transition|
-          metadata = transition_metadata[transition] || {}
-          callbacks = metadata[:callbacks] || {}
-
-          graph.add_edges(
-            graph_node_id(transition.source_state_id),
-            graph_node_id(transition.target_state_id),
-            label: transition.label.to_s,
-            labelfontsize: 10,
-            taillabel: Array(callbacks[:before]).compact.join("\n"),
-            headlabel: Array(callbacks[:after]).compact.join("\n")
-          )
-        end
+      # The guards a transition runs under, as one bracketed condition:
+      # "[if ready? && if_state gate=open]"
+      def guard_label(conditions)
+        phrases = Diagram::Labels.condition_phrases(conditions)
+        "[#{phrases.join(' && ')}]" unless phrases.empty?
       end
 
-      def build_state_lookup(machine)
-        machine.states.each_with_object({}) do |state, memo|
-          key = state.name ? state.name.to_s : 'nil_state'
-          memo[key] = state
-        end
-      end
+      def draw_built(graph, builder)
+        states = Diagram::Introspection.states_of(builder.machine).to_h { [Diagram::Builder.state_id(it.name), it] }
+        nodes = builder.diagram.states.to_h { [it.id, add_state_node(graph, builder, states.fetch(it.id))] }
 
-      def graph_node_id(diagram_state_id)
-        diagram_state_id == 'nil_state' ? 'nil' : diagram_state_id
-      end
-
-      def transition_metadata_map(builder)
-        Array(builder&.transition_metadata).each_with_object({}) do |metadata, memo|
+        builder.transition_metadata.each do |metadata|
           transition = metadata[:transition]
-          memo[transition] = metadata if transition
+          add_transition_edge(graph, nodes.fetch(transition.source_state_id),
+                              nodes.fetch(transition.target_state_id), metadata)
         end
       end
 
-      def draw_branch_with_label(branch, graph, event_label, machine, valid_states)
-        branch.state_requirements.each do |state_requirement|
-          from_states = state_requirement[:from].filter(valid_states)
-
-          if state_requirement[:to].values.empty?
-            loopback = true
-          else
-            to_state = state_requirement[:to].values.first
-            to_state = to_state ? to_state.to_s : 'nil'
-            loopback = false
-          end
-
-          from_states.each do |from_state|
-            from_state = from_state ? from_state.to_s : 'nil'
-            graph.add_edges(
-              from_state,
-              loopback ? from_state : to_state,
-              label: event_label,
-              labelfontsize: 10,
-              taillabel: callback_method_names(machine, branch, :before).join("\n"),
-              headlabel: callback_method_names(machine, branch, :after).join("\n")
-            )
-          end
-        end
+      # The state's node: a double circle for a final state, an edge from
+      # the start point for the initial one (a state can be both)
+      def add_state_node(graph, builder, state)
+        id = Diagram::Builder.state_id(state.name)
+        metadata = builder.state_metadata.fetch(id)
+        node = graph.add_nodes(
+          node_id(id),
+          label: dot_text([node_label(state, metadata[:label])]),
+          width: '1',
+          height: '1',
+          shape: metadata[:final] ? 'doublecircle' : 'ellipse'
+        )
+        graph.add_edges(graph.add_nodes(START_NODE_ID, shape: 'point'), node) if metadata[:initial]
+        node
       end
 
-      def callback_method_names(machine, branch, type)
-        event_name = branch.event_requirement.values.first
-        machine.callbacks[type].select do |callback|
-          callback.branch.matches?(branch,
-                                   from: branch.state_requirements.map { |req| req[:from] },
-                                   to: branch.state_requirements.map { |req| req[:to] },
-                                   on: event_name)
-        end.flat_map do |callback|
-          callback.instance_variable_get('@methods')
-        end.compact
+      # The state's label and, as State#description shows it, its value
+      # when that is not its name: "parked (1)", "idling (*)" for a lambda
+      def node_label(state, label)
+        value = state.value(false)
+        return label if state.name.to_s == value.to_s
+
+        "#{label} (#{value.is_a?(Proc) ? '*' : value.inspect})"
+      end
+
+      # The event and its guards over the edge; before (and around, which the
+      # core runs with them) callbacks at its tail, after callbacks at its head
+      def add_transition_edge(graph, from, to, metadata)
+        callbacks = metadata[:callbacks]
+        graph.add_edges(
+          from,
+          to,
+          label: dot_text([metadata[:label], guard_label(metadata[:conditions])]),
+          labelfontsize: 10,
+          taillabel: dot_text(callbacks[:before] + callbacks[:around]),
+          headlabel: dot_text(callbacks[:after])
+        )
+      end
+
+      # Lines of label text as DOT shows them as they are
+      def dot_text(lines)
+        lines.compact.map { |line| line.gsub(LABEL_ESCAPES) { "\\#{it}" } }.join("\n")
       end
     end
   end
