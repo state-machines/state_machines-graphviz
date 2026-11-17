@@ -129,6 +129,52 @@ class MachineDrawingFromBuilderTest < Minitest::Test
     assert_equal('"log_start\nlog_done"', dot(ignite, 'headlabel'))
   end
 
+  # A transition's own callbacks run closest to the state change: its befores
+  # and arounds after the machine's, in the order written, its afters first
+  def test_a_transitions_own_callbacks_show_where_the_core_runs_them
+    graph = draw(machine(initial: :parked) do
+      before_transition do: :check_mirrors
+      around_transition do: :hold_brake
+      before_transition on: :ignite, do: :fasten_belt, if: :passengers?
+      after_transition do: :log_change
+      event :ignite do
+        transition parked: :idling, before: :prime_pump, around: :crank, after: %i[log_start warm_up]
+      end
+    end)
+
+    ignite = edges(graph).fetch(%w[parked idling])
+
+    assert_equal('"check_mirrors\nhold_brake\nfasten_belt (if passengers?)\nprime_pump\ncrank"',
+                 dot(ignite, 'taillabel'))
+    assert_equal('"log_start\nwarm_up\nlog_change"', dot(ignite, 'headlabel'))
+  end
+
+  def test_each_branch_shows_its_own_callbacks
+    graph = draw(machine(initial: :parked) do
+      state :stalled
+      after_transition do: :log_change
+      event :ignite do
+        transition parked: :idling, if: :fuel?, around: :crank, before: :prime_pump
+        transition parked: :stalled, after: :call_tow
+      end
+      state :idling do
+        transition to: :parked, on: :park, before: :set_brake
+      end
+    end)
+
+    idling = edges(graph).fetch(%w[parked idling])
+    stalled = edges(graph).fetch(%w[parked stalled])
+    park = edges(graph).fetch(%w[idling parked])
+
+    # around: is written before before:, so crank enters first
+    assert_equal('"crank\nprime_pump"', dot(idling, 'taillabel'))
+    assert_equal('"log_change"', dot(idling, 'headlabel'))
+    assert_equal('"ignite\n[if fuel?]"', dot(idling, 'label'))
+    assert_equal('""', dot(stalled, 'taillabel'))
+    assert_equal('"call_tow\nlog_change"', dot(stalled, 'headlabel'))
+    assert_equal('"set_brake"', dot(park, 'taillabel'))
+  end
+
   def test_human_names_label_states_and_events
     graph = draw(machine(initial: :parked) do
       state :parked, human_name: 'Parked'

@@ -95,6 +95,9 @@ so it shows what the core performs:
 * callbacks are listed in the order the core runs them: before and around callbacks
   at an edge's tail in declaration order (an around where it enters), after callbacks
   at its head, a conditional one with its conditions: `log_start (if logging?)`
+* a transition's own callbacks (`transition parked: :idling, before: :prime, after: :log`)
+  run closest to the state change: at the tail after the machine's, in the order
+  written, at the head before the machine's
 * from one source an event takes its first matching branch, so a branch an unguarded
   one before it always takes over is not drawn
 
