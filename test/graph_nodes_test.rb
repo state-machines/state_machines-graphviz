@@ -16,10 +16,10 @@ describe StateMachines::Graph do
   end
 
   def test_should_use_specified_options
-    assert_equal('ellipse', @node['shape'].to_s.gsub('"', ''))
+    assert_equal('ellipse', @node['shape'].to_s.delete('"'))
   end
 
   def test_should_set_default_font
-    assert_equal('Arial', @node['fontname'].to_s.gsub('"', ''))
+    assert_equal('Arial', @node['fontname'].to_s.delete('"'))
   end
 end

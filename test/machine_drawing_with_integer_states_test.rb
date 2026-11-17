@@ -21,18 +21,18 @@ describe StateMachines::Graph do
   end
 
   def test_should_draw_all_states
-    assert_equal(@graph.node_count, 3)
+    assert_equal(3, @graph.node_count)
   end
 
   def test_should_draw_all_events
-    assert_equal(@graph.edge_count, 2)
+    assert_equal(2, @graph.edge_count)
   end
 
   def test_should_draw_machine
-    assert(File.exist?("doc/state_machines/#{@klass.name}_state_id.png"))
+    assert_path_exists("doc/state_machines/#{@klass.name}_state_id.png")
   end
 
   def teardown
-    assert(File.exist?("doc/state_machines/#{@klass.name}_state_id.png"))
+    FileUtils.rm_f("doc/state_machines/#{@klass.name}_state_id.png")
   end
 end

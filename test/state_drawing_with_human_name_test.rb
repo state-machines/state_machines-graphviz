@@ -15,6 +15,6 @@ describe StateMachines::Graph do
   end
 
   def test_should_use_description_with_human_name_as_label
-    assert_equal('Parked', @node['label'].to_s.gsub('"', ''))
+    assert_equal('Parked', @node['label'].to_s.delete('"'))
   end
 end

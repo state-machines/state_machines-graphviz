@@ -15,7 +15,7 @@ describe StateMachines::Graph do
   end
 
   def test_should_use_ellipse_as_shape
-    assert_equal 'ellipse', @node['shape'].to_s.gsub('"', '')
+    assert_equal 'ellipse', @node['shape'].to_s.delete('"')
   end
 
   def test_should_draw_edge_between_point_and_state

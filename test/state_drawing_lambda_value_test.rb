@@ -16,6 +16,6 @@ describe StateMachines::Graph do
   end
 
   def test_should_use_description_as_label
-    assert_equal('parked (*)', @node['label'].to_s.gsub('"', ''))
+    assert_equal('parked (*)', @node['label'].to_s.delete('"'))
   end
 end

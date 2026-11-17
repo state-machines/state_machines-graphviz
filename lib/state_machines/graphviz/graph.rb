@@ -27,8 +27,7 @@ module StateMachines
       options = { path: 'doc/state_machines', format: 'png', font: 'Arial', orientation: 'portrait' }.merge(options)
       StateMachines::OptionsValidator.assert_valid_keys!(options, :path, :format, :font, :orientation)
 
-      # TODO: fail if path cannot be created or readonly
-      FileUtils.mkpath(options[:path]) unless Dir.exist? options[:path]
+      FileUtils.mkpath(options[:path])
       @font = options[:font]
       @file_path = File.join(options[:path], "#{name}.#{options[:format]}")
       @file_format = options[:format]

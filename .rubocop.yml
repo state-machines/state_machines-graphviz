@@ -1,0 +1,41 @@
+plugins:
+  - rubocop-minitest
+  - rubocop-rake
+  - rubocop-performance
+AllCops:
+  TargetRubyVersion: 4.0
+  NewCops: enable
+  Exclude:
+    - 'doc/**/*'
+    - 'pkg/**/*'
+    - 'tmp/**/*'
+    - 'vendor/**/*'
+
+Style/Documentation:
+  Enabled: false
+
+Metrics/MethodLength:
+    Max: 20
+
+Metrics/AbcSize:
+    Max: 40
+
+Minitest/MultipleAssertions:
+  Enabled: false
+
+Gemspec/DevelopmentDependencies:
+  Enabled: false
+
+Metrics/ClassLength:
+  Exclude:
+    - 'test/**/*' # Allow longer test classes
+
+# The gem's entry point is named after the gem.
+Naming/FileName:
+  Exclude:
+    - 'lib/state_machines-graphviz.rb'
+
+# Test classes are long blocks by nature.
+Metrics/BlockLength:
+  Exclude:
+    - 'test/**/*'

@@ -12,6 +12,6 @@ describe StateMachines::Graph do
   end
 
   def test_should_use_doublecircle_as_shape
-    assert_equal('doublecircle', @node['shape'].to_s.gsub('"', ''))
+    assert_equal('doublecircle', @node['shape'].to_s.delete('"'))
   end
 end

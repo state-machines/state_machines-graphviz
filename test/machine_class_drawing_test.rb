@@ -14,7 +14,8 @@ describe StateMachines::Machine do
 
   def test_should_load_files
     machine = switch_machine
-    assert(defined?(::Switch))
+
+    assert(defined?(Switch))
     assert(machine)
   end
 
@@ -22,7 +23,8 @@ describe StateMachines::Machine do
     machine = switch_machine
     output_path = File.dirname(__FILE__)
     machine.draw(path: output_path, format: 'jpg')
-    assert(File.exist?("#{output_path}/#{Switch.name}_state.jpg"))
+
+    assert_path_exists("#{output_path}/#{Switch.name}_state.jpg")
     FileUtils.rm Dir["{.,#{output_path}}/#{Switch.name}_state.{jpg,png}"]
   end
 end

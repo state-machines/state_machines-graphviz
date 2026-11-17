@@ -12,7 +12,7 @@ describe StateMachines::Graph do
   end
 
   def test_should_save_file
-    assert File.exist?("doc/state_machines/#{@graph_name}.png")
+    assert_path_exists "doc/state_machines/#{@graph_name}.png"
   end
 
   def teardown

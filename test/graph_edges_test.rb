@@ -19,10 +19,10 @@ describe StateMachines::Graph do
   end
 
   def test_should_use_specified_options
-    assert_equal('ignite', @edge['label'].to_s.gsub('"', ''))
+    assert_equal('ignite', @edge['label'].to_s.delete('"'))
   end
 
   def test_should_set_default_font
-    assert_equal('Arial', @edge['fontname'].to_s.gsub('"', ''))
+    assert_equal('Arial', @edge['fontname'].to_s.delete('"'))
   end
 end

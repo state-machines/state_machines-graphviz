@@ -16,18 +16,18 @@ describe StateMachines::Graph do
   end
 
   def test_should_use_ellipse_shape
-    assert_equal(@node['shape'].to_s.gsub('"', ''), 'ellipse')
+    assert_equal('ellipse', @node['shape'].to_s.delete('"'))
   end
 
   def test_should_set_width_to_one
-    assert_equal('1', @node['width'].to_s.gsub('"', ''))
+    assert_equal('1', @node['width'].to_s.delete('"'))
   end
 
   def test_should_set_height_to_one
-    assert_equal('1', @node['height'].to_s.gsub('"', ''))
+    assert_equal('1', @node['height'].to_s.delete('"'))
   end
 
   def test_should_use_description_as_label
-    assert_equal(@node['label'].to_s.gsub('"', ''), 'parked (1)')
+    assert_equal('parked (1)', @node['label'].to_s.delete('"'))
   end
 end
