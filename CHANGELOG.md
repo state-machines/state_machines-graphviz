@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.0](https://github.com/state-machines/state_machines-graphviz/compare/v0.2.0...v0.3.0) (2026-11-17)
+
+
+### Features
+
+* require state_machines-diagram 0.4.0 for transition callbacks ([97a022f](https://github.com/state-machines/state_machines-graphviz/commit/97a022f3d972f2a7c87d03b5d7957a727d93c498))
+
 ## [0.2.0](https://github.com/state-machines/state_machines-graphviz/compare/v0.1.0...v0.2.0) (2026-11-17)
 
 
