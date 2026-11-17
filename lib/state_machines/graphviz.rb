@@ -10,26 +10,18 @@ module StateMachines
   module Graphviz
     module_function
 
+    # Draws every state machine of each class in +class_names+ (a
+    # comma-separated list) with GraphViz, whichever renderer machines use
     def draw(class_names, options = {})
-      if class_names.nil? || class_names.to_s.split(',').empty?
-        raise ArgumentError, 'At least one class must be specified'
-      end
+      names = class_names.to_s.split(',').map(&:strip).reject(&:empty?)
+      raise ArgumentError, 'At least one class must be specified' if names.empty?
 
-      # Load any files
-      if (files = options.delete(:file))
-        files.split(',').each { |file| require file }
-      end
+      options = options.dup
+      options.delete(:file).to_s.split(',').each { |file| require file.strip }
 
-      class_names.to_s.split(',').each do |class_name|
-        # Navigate through the namespace structure to get to the class
-        klass = Object
-        class_name.split('::').each do |name|
-          klass = klass.const_defined?(name) ? klass.const_get(name) : klass.const_missing(name)
-        end
-
-        # Draw each of the class's state machines
-        klass.state_machines.each_value do |machine|
-          machine.draw(**options)
+      names.each do |class_name|
+        Object.const_get(class_name).state_machines.each_value do |machine|
+          Renderer.draw_machine(machine, **options)
         end
       end
     end
