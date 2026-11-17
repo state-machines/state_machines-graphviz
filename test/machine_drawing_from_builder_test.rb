@@ -112,6 +112,23 @@ class MachineDrawingFromBuilderTest < Minitest::Test
     assert_equal('"log_stop"', dot(park, 'headlabel'))
   end
 
+  def test_callbacks_show_in_the_order_the_core_runs_them
+    graph = draw(machine(initial: :parked) do
+      around_transition on: :ignite, do: :hold_brake
+      before_transition from: :parked, do: :check_mirrors
+      after_transition to: :idling, do: :log_start
+      around_transition on: :ignite, do: :time_it
+      after_transition on: :ignite, do: :log_done
+      event(:ignite) { transition parked: :idling }
+    end)
+
+    ignite = edges(graph).fetch(%w[parked idling])
+
+    # An around declared before a before enters first; the afters follow the state change
+    assert_equal('"hold_brake\ncheck_mirrors\ntime_it"', dot(ignite, 'taillabel'))
+    assert_equal('"log_start\nlog_done"', dot(ignite, 'headlabel'))
+  end
+
   def test_human_names_label_states_and_events
     graph = draw(machine(initial: :parked) do
       state :parked, human_name: 'Parked'

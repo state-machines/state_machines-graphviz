@@ -113,17 +113,21 @@ module StateMachines
         "#{label} (#{value.is_a?(Proc) ? '*' : value.inspect})"
       end
 
-      # The event and its guards over the edge; before (and around, which the
-      # core runs with them) callbacks at its tail, after callbacks at its head
+      # The event and its guards over the edge. The callbacks in the order the
+      # core runs them (Introspection.callback_sequence): those that run
+      # before the state changes at the edge's tail, before and around
+      # callbacks in declaration order with an around where it enters (as
+      # Labels.action_list lists it), the after callbacks at its head
       def add_transition_edge(graph, from, to, metadata)
-        callbacks = metadata[:callbacks]
+        sequence = metadata[:callback_sequence].reject { it[:phase] == :exit }
+        after, before = sequence.partition { it[:kind] == :after }
         graph.add_edges(
           from,
           to,
           label: dot_text([metadata[:label], guard_label(metadata[:conditions])]),
           labelfontsize: 10,
-          taillabel: dot_text(callbacks[:before] + callbacks[:around]),
-          headlabel: dot_text(callbacks[:after])
+          taillabel: dot_text(before.map { it[:text] }),
+          headlabel: dot_text(after.map { it[:text] })
         )
       end
 

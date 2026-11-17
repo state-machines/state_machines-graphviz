@@ -92,8 +92,9 @@ so it shows what the core performs:
 * a state's value shows after its name when the two differ: `parked (1)`, `idling (*)` for a lambda
 * each edge reads `event` and, when guarded, its conditions as the core checks them:
   `[if engine_started? && unless braking? && if_any_state (gate=open, alarm=on)]`
-* before (and around) callbacks sit at an edge's tail, after callbacks at its head,
-  a conditional one with its conditions: `log_start (if logging?)`
+* callbacks are listed in the order the core runs them: before and around callbacks
+  at an edge's tail in declaration order (an around where it enters), after callbacks
+  at its head, a conditional one with its conditions: `log_start (if logging?)`
 * from one source an event takes its first matching branch, so a branch an unguarded
   one before it always takes over is not drawn
 
