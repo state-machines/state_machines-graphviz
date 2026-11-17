@@ -1,0 +1,12 @@
+{
+  "bootstrap-sha": "edceab5e1287e868c554267997812eef1ff5521a",
+  "include-component-in-tag": false,
+  "packages": {
+    ".": {
+      "release-type": "ruby",
+      "package-name": "state_machines-graphviz",
+      "version-file": "lib/state_machines/graphviz/version.rb",
+      "bump-minor-pre-major": true
+    }
+  }
+}
