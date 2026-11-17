@@ -17,8 +17,8 @@ Gem::Specification.new do |spec|
   spec.require_paths = ['lib']
 
   spec.add_dependency 'ruby-graphviz'
-  spec.add_dependency 'state_machines', '>= 0.303.0'
-  spec.add_dependency 'state_machines-diagram', '>= 0.3.0'
+  spec.add_dependency 'state_machines', '>= 0.304.0'
+  spec.add_dependency 'state_machines-diagram', '>= 0.4.0'
 
   spec.add_development_dependency 'bundler'
   spec.add_development_dependency 'minitest', '~> 6.0'
